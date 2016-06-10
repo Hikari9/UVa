@@ -1,0 +1,52 @@
+// UVa 10309 - Turn the Lights Off
+// by Rico Tiongson
+// C++ 0.000s 06/10/16
+#include <bits/stdc++.h>
+#define forn(i, a, n) for (int i = a; i < n; ++i)
+
+using namespace std;
+
+char nm[1000];
+char g[10][11], c[10][11];
+int dx[] = {0, -1, 0, 1, 0};
+int dy[] = {0, 0, -1, 0, 1};
+
+void toggle(int i, int j) {
+	forn (k, 0, 5) {
+		int x = i + dx[k];
+		int y = j + dy[k];
+		if (x >= 0 && x < 10 && y >= 0 && y < 10)
+			c[x][y] = (c[x][y] == '#' ? 'O' : '#');
+	}
+}
+
+int main() {
+	while (scanf("%s", nm) == 1 && strcmp(nm, "end")) {
+		forn (i, 0, 10) scanf("%s", g[i]);
+		int mn = 101;
+		forn (mask, 0, 1 << 10) {
+			int toggles = 0;
+			memcpy(c, g, sizeof g);
+			forn (j, 0, 10) {
+				if ((1 << j) & mask) {
+					toggle(0, j);
+					toggles++;
+				}
+			}
+			forn (i, 1, 10) {
+				forn (j, 0, 10) {
+					if (c[i-1][j] == 'O') {
+						toggle(i, j);
+						toggles++;
+					}
+				}
+			}
+			forn (j, 0, 10)
+				if (c[9][j] == 'O')
+					goto loop;
+			mn = min(mn, toggles);
+			loop:;
+		}
+		printf("%s %d\n", nm, mn == 101 ? -1 : mn);
+	}
+}
