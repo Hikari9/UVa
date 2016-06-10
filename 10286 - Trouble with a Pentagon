@@ -1,0 +1,14 @@
+// UVa 10286 - Trouble with a Pentagon
+#include <bits/stdc++.h>
+using namespace std;
+int main() {
+	double gamma = (108 - 90) / 2 * M_PI / 180;
+	double beta = 108 * M_PI / 180;
+	double alpha = M_PI - gamma - beta;
+	double d;
+	while (scanf("%lf", &d) == 1) {
+		// sin(alpha) / d == sin(beta) / s
+		double s = sin(beta) * d / sin(alpha);
+		printf("%.10lf\n", s);
+	}
+}
