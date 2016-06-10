@@ -1,0 +1,21 @@
+// UVa 10763 - Foreign Exchange
+// by Rico Tiongson
+// 06/10/16
+#include <bits/stdc++.h>
+using namespace std;
+int n;
+set< pair<int, int> > ch;
+int main() {
+	while (scanf("%d", &n) == 1 && n) {
+		ch.clear();
+		for (int i = 0; i < n; ++i) {
+			int a, b; scanf("%d%d", &a, &b);
+			if (b < a) swap(a, b);
+			if (ch.count(make_pair(a, b)))
+				ch.erase(make_pair(a, b));
+			else
+				ch.insert(make_pair(a, b));
+		}
+		printf(ch.empty() ? "YES\n" : "NO\n");
+	}
+}
