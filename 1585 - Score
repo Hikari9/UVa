@@ -1,0 +1,25 @@
+// UVa 1585 - Score
+// by Rico Tiongson
+// 06/10/16
+#include <bits/stdc++.h>
+using namespace std;
+
+int t;
+char s[100];
+
+int main() {
+	scanf("%d", &t);
+	while (t--) {
+		scanf("%s", s);
+		int cumu = 0;
+		int total = 0;
+		for (int i = 0; s[i]; ++i) {
+			if (s[i] == 'O') {
+				total += (++cumu);
+			} else {
+				cumu = 0;
+			}
+		}
+		printf("%d\n", total);
+	}
+}
