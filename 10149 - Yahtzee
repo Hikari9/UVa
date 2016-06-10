@@ -1,0 +1,155 @@
+// UVa 10149 - Yahtzee
+// by Rico Tiongson
+// C++ 0.030s 06/10/16
+
+#include <bits/stdc++.h>
+#define forn(i, a, n) for (int i = a; i < n; ++i)
+#define fori(i, a, n) for (i = a; i < n; ++i)
+#define forr(i, a, n) for (int i = (n) - 1; i >= a; --i)
+#define pb push_back
+#define inf 0xdeadbee
+
+using namespace std;
+typedef long long ll;
+typedef vector<int> vi;
+typedef pair<int, int> pii;
+
+const int n = 13, m = 5, N = 7;
+int data[n][m], ord[n];
+bool mark[n];
+
+int hn;
+int cost[N+1][N+1];
+int way[N+1], p[N+1];
+int minv[N+1], A[N+1], B[N+1];
+int val[n+2], mxval[n+2];
+bool used[N+1];
+
+int hungarian() {
+	forn (i, 0, hn + 1)
+	forn (j, 0, hn + 1)
+	cost[i][j] *= -1;
+	for (int i = 0; i <= N; ++i)
+		A[i] = B[i] = p[i] = way[i] = 0;
+	for (int i = 1; i <= hn; ++i) {
+		p[0] = i;
+		int R = 0;
+		for (int j = 0; j <= hn; ++j)
+			minv[j] = inf, used[j] = false;
+		do {
+			int L = p[R], dR = 0;
+			int delta = inf;
+			used[R] = true;
+			for (int j = 1; j <= hn; ++j) {
+				if (!used[j]) {
+					int c = cost[L][j] - A[L] - B[j];
+					if (c < minv[j])
+						minv[j] = c, way[j] = R;
+					if (minv[j] < delta)
+						delta = minv[j], dR = j;
+				}
+			}
+			for (int j = 0; j <= hn; ++j) {
+				if (used[j]) A[p[j]] += delta, B[j] -= delta;
+				else minv[j] -= delta;
+			}
+			R = dR;
+		} while (p[R] != 0);
+		for (; R != 0; R = way[R]) p[R] = p[way[R]];
+	}
+	return B[0];
+}
+
+int bipartite_matching_six() {
+	hn = 6;
+	forn (i, 0, 6) {
+		forn (j, 0, 6) {
+			// count the (j + 1)'s in data
+			int thrown = 0;
+			forn (k, 0, 5)
+				if (data[ord[i]][k] == j + 1)
+					thrown += j + 1;
+			cost[i + 1][j + 1] = thrown;
+		}
+	}
+	int h = hungarian();
+	forn (i, 0, hn)
+		val[i] = -cost[p[i+1]][i+1];
+	return h;
+}
+
+int bipartite_matching_seven() {
+	memset(mark, 0, sizeof mark);
+	forn (i, 0, 6)
+		mark[ord[i]] = true;
+	int size = 0;
+	forn (i, 0, n) 
+		if (!mark[i])
+			ord[6+(size++)] = i;
+	hn = 7;
+	forn (i, 0, 7) {
+		int ind = ord[6+i];
+		map<int, int> freq;
+		int mxfreq = 0;
+		forn (j, 0, 5) mxfreq = max(mxfreq, ++freq[data[ind][j]]);
+		int s = accumulate(data[ind], data[ind] + 5, 0);
+		// of a kinds
+		cost[i+1][1] = s;
+		cost[i+1][2] = mxfreq >= 3 ? s : 0;
+		cost[i+1][3] = mxfreq >= 4 ? s : 0;
+		cost[i+1][4] = mxfreq >= 5 ? 50 : 0;
+		// straights
+		set<int> st;
+		forn (j, 0, 5) st.insert(data[ind][j]);
+		cost[i+1][5] = 
+			(st.size() == 4 && *st.rbegin() - *st.begin() == 3)
+			|| (st.size() == 5 && (
+				*st.rbegin() - *(++st.begin()) == 3
+				|| *(++st.rbegin()) - *st.begin() == 3
+			)) ? 25 : 0;
+		// others
+		cost[i+1][6] = st.size() == 5 && *st.rbegin() - *st.begin() == 4 ? 35 : 0;
+		cost[i+1][7] = mxfreq == 3 && freq.size() == 2 ? 40 : 0;
+	}
+	int h = hungarian();
+	forn (i, 0, hn)
+		val[i+6] = -cost[p[i+1]][i+1];
+	return h;
+}
+
+int main() {
+	while (scanf("%d", &data[0][0]) == 1) {
+		forn (i, 0, n) {
+			forn (j, 0, m) {
+				if (i == 0 && j == 0) continue;
+				scanf("%d", &data[i][j]);
+			}
+		}
+		int mx = 0;
+		// choose the initial 6
+		// (13 choose 6) == 1716
+		fori (ord[0], 0, n)
+		fori (ord[1], ord[0] + 1, n)
+		fori (ord[2], ord[1] + 1, n)
+		fori (ord[3], ord[2] + 1, n)
+		fori (ord[4], ord[3] + 1, n)
+		fori (ord[5], ord[4] + 1, n) {
+			int first_six = bipartite_matching_six();
+			int bonus = first_six >= 63 ? 35 : 0;
+			int last_seven = bipartite_matching_seven();
+			int total = first_six + last_seven + bonus;
+			if (total > mx) {
+				mx = total;
+				val[13] = bonus;
+				val[14] = total;
+				forn (i, 0, 15)
+					mxval[i] = val[i];
+			}
+		}
+		forn (i, 0, 15) {
+			if (i) printf(" ");
+			printf("%d", mxval[i]);
+		}
+		printf("\n");
+	}
+}
