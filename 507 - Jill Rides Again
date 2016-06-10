@@ -1,0 +1,35 @@
+// UVa 507 - Jill Rides Again
+// by Rico Tiongson
+// 06/10/16
+#include <bits/stdc++.h>
+using namespace std;
+const int N = 20005;
+
+int t, n, a[N], tc;
+
+int main() {
+	scanf("%d", &t);
+	while (t--) {
+		scanf("%d", &n); --n;
+		for (int i = 0; i < n; ++i) scanf("%d", a + i);
+		long long sum = 0, nice = LLONG_MIN;
+		int L = 0, na = -1, nb = -1;
+		for (int i = 0; i < n; ++i) {
+			sum += a[i];
+			if (sum > nice) {
+				nice = sum;
+				na = L;
+				nb = i;
+			} else if (sum == nice && nb-na < i-L) {
+				na = L;
+				nb = i;
+			}
+			if (sum < 0) {
+				sum = 0;
+				L = i + 1;
+			}
+		}
+		if (nice <= 0) printf("Route %d has no nice parts\n", ++tc);
+		else printf("The nicest part of route %d is between stops %d and %d\n", ++tc, na+1, nb+2);
+	}
+}
