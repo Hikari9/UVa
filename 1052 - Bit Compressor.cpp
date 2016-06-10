@@ -5,49 +5,24 @@
  */
 #include <bits/stdc++.h>
 #define forn(i, a, n) for (int i = a; i < n; ++i)
-#define forr(i, a, n) for (int i = (n) - 1; i >= a; --i)
-#define pb push_back
 
 using namespace std;
-const int N = 40;
-typedef pair<int, int> pii;
-typedef vector<int> vi;
 typedef long long ll;
+const int N = 40;
 enum {NO, UNIQUE, NOT_UNIQUE};
 
-map<ll, map<ll, int> > dp[N];
-ll l, n;
+map<int, map<int, int> > dp[N];
+int l, n, tc;
 string s;
-int tc, bits[1 << 16];
-int count_bits(ll x) {
-	return x == 0 ? 0 : bits[int(x & ((1 << 16) - 1))] + count_bits(x >> 16);
-}
-int count_zeroes(ll x) {
-	if (!x) return 0;
-	int lg = -count_bits(x);
-	for (int i = 32; i > 0; i >>= 1) {
-		if (x >> i) {
-			lg += i;
-			x >>= i;
-		}
-	}
-	return lg + 1;
-}
-int solve(int i, ll ones, ll zeroes) {
-	if (ones < 0 || zeroes < 0) {
-		return NO;
-	}
-	// debug flag;
-	// cout << "checking " << i << ' ' << ones << ' ' << zeroes << endl;
-	if (i == s.length()) {
-		return ones==0 && zeroes==0 ? UNIQUE : NO;
-	}
-	if (dp[i].count(ones) && dp[i][ones].count(zeroes)) {
+
+int solve(int i, int ones, int zeroes) {
+	if (ones < 0 || zeroes < 0) return NO;
+	if (i == s.length())
+		return ones == 0 && zeroes == 0 ? UNIQUE : NO;
+	if (dp[i][ones].count(zeroes))
 		return dp[i][ones][zeroes];
-	}
-	if (s[i] == '0') {
+	if (s[i] == '0')
 		return dp[i][ones][zeroes] = solve(i + 1, ones, zeroes - 1);
-	}
 	ll def = 0;
 	int ans = 0;
 	forn (j, i, s.length()) {
@@ -58,9 +33,8 @@ int solve(int i, ll ones, ll zeroes) {
 				ans += solve(j + 1, ones - 2, zeroes); // special case
 		}
 		if (def > ones) break;
-		if (ans >= NOT_UNIQUE) {
+		if (ans >= NOT_UNIQUE)
 			return dp[i][ones][zeroes] = NOT_UNIQUE;
-		}
 	}
 	return dp[i][ones][zeroes] = ans;
 }
@@ -68,8 +42,6 @@ int solve(int i, ll ones, ll zeroes) {
 string outp[] = {"NO", "YES", "NOT UNIQUE"};
 
 int main() {
-	forn (i, 1, (1 << 16))
-		bits[i] = bits[i >> 1] + (i & 1);
 	ios::sync_with_stdio(false);
 	cin.tie(0);
 	while (cin >> l >> n && (n || l)) {
